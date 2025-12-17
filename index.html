@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StVO Teleprompter - Fahrlehrer Inside</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+        }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: #2a2a2a;
+            border-bottom: 2px solid #3a3a3a;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background: #3a3a3a;
+            border: none;
+            border-radius: 8px;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            background: #4a4a4a;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* Content Sections */
+        .content {
+            display: none;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        /* Editor Section */
+        .editor-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .editor-controls {
+            background: #2a2a2a;
+            padding: 1.5rem;
+            border-radius: 12px;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #3a3a3a;
+            color: #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #4a4a4a;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .editor-textarea {
+            width: 100%;
+            min-height: 500px;
+            padding: 1.5rem;
+            background: #2a2a2a;
+            border: 2px solid #3a3a3a;
+            border-radius: 12px;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        .editor-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .help-box {
+            background: #2a2a2a;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .help-box h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .help-box ul {
+            list-style-position: inside;
+            line-height: 1.8;
+        }
+
+        .help-box code {
+            background: #3a3a3a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #ffa726;
+        }
+
+        /* Teleprompter Section */
+        .teleprompter-container {
+            background: #000;
+            min-height: 80vh;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .teleprompter-controls {
+            background: rgba(42, 42, 42, 0.95);
+            padding: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .speed-control input {
+            width: 150px;
+        }
+
+        .teleprompter-content {
+            padding: 3rem;
+            font-size: 1.5rem;
+            line-height: 2.2;
+            color: #fff;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .teleprompter-content.scrolling {
+            animation: scroll-up linear infinite;
+        }
+
+        .paragraph-marker {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem 0;
+            display: block;
+        }
+
+        .cross-reference {
+            color: #ffa726;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .cross-reference:hover {
+            color: #ffb74d;
+        }
+
+        .current-line {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 0.5rem;
+            border-left: 4px solid #667eea;
+        }
+
+        /* Navigation Section */
+        .navigation-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .nav-card {
+            background: #2a2a2a;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-card:hover {
+            background: #3a3a3a;
+            transform: translateX(5px);
+        }
+
+        .nav-card h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-card p {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #2a2a2a;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-card .label {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Status Messages */
+        .status-message {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            background: #28a745;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Fullscreen Teleprompter */
+        .teleprompter-container.fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            border-radius: 0;
+        }
+
+        .teleprompter-container.fullscreen .teleprompter-content {
+            font-size: 2.5rem;
+            line-height: 2.5;
+            padding: 5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .tabs {
+                overflow-x: auto;
+            }
+
+            .teleprompter-content {
+                font-size: 1.2rem;
+                padding: 1.5rem;
+            }
+
+            .navigation-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>🚗 StVO Teleprompter</h1>
+        <p>Podcast-Tool für Fahrlehrer Inside | Entwickelt für FL-BE_07/25</p>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+        <button class="tab-button active" onclick="switchTab('editor')">📝 Editor</button>
+        <button class="tab-button" onclick="switchTab('teleprompter')">🎙️ Teleprompter</button>
+        <button class="tab-button" onclick="switchTab('navigation')">🗂️ Navigation</button>
+    </div>
+
+    <!-- Editor Section -->
+    <div id="editor" class="content active">
+        <div class="editor-container">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="number" id="paragraphCount">0</div>
+                    <div class="label">Paragraphen</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="wordCount">0</div>
+                    <div class="label">Wörter</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="estimatedTime">0</div>
+                    <div class="label">Min. geschätzt</div>
+                </div>
+            </div>
+
+            <div class="editor-controls">
+                <button class="btn btn-primary" onclick="saveContent()">💾 Speichern</button>
+                <button class="btn btn-secondary" onclick="exportData()">📥 Export (JSON)</button>
+                <button class="btn btn-secondary" onclick="importData()">📤 Import (JSON)</button>
+                <button class="btn btn-danger" onclick="clearContent()">🗑️ Alles löschen</button>
+            </div>
+
+            <textarea 
+                id="contentEditor" 
+                class="editor-textarea" 
+                placeholder="Füge hier deinen StVO-Content ein...
+
+Beispiel:
+
+# § 1 Grundregeln
+
+(1) Die Teilnahme am Straßenverkehr erfordert ständige Vorsicht und gegenseitige Rücksicht.
+
+ERLÄUTERUNG: Dies ist der Grundsatz für alle Verkehrsteilnehmer. In der Fahrschule lernen wir...
+
+QUERVERWEISE: § 2, § 3 Abs. 1
+
+---
+
+# § 2 Straßenbenutzung durch Fahrzeuge
+
+(1) Fahrzeuge müssen die Fahrbahnen benutzen...
+"
+                oninput="updateStats(); autoSave()"></textarea>
+
+            <div class="help-box">
+                <h3>💡 Formatierungs-Hilfe</h3>
+                <ul>
+                    <li><code># § 1 Titel</code> - Erstellt einen neuen Paragraphen</li>
+                    <li><code>(1), (2), (3)</code> - Absätze werden automatisch erkannt</li>
+                    <li><code>ERLÄUTERUNG:</code> - Markiert deine eigenen Erklärungen</li>
+                    <li><code>QUERVERWEISE:</code> - Automatische Verlinkung zu anderen §§</li>
+                    <li><code>---</code> - Trennlinie zwischen Paragraphen</li>
+                    <li><code>§ 5</code> oder <code>§ 5 Abs. 2</code> - Wird automatisch verlinkt</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teleprompter Section -->
+    <div id="teleprompter" class="content">
+        <div class="teleprompter-container" id="teleprompterContainer">
+            <div class="teleprompter-controls">
+                <button class="btn btn-primary" id="playPauseBtn" onclick="togglePlayPause()">▶️ Start</button>
+                <button class="btn btn-secondary" onclick="resetScroll()">⏮️ Reset</button>
+                <button class="btn btn-secondary" onclick="toggleFullscreen()">⛶ Vollbild</button>
+                
+                <div class="speed-control">
+                    <label for="scrollSpeed" style="color: #e0e0e0;">Geschwindigkeit:</label>
+                    <input type="range" id="scrollSpeed" min="1" max="10" value="3" oninput="updateSpeed()">
+                    <span id="speedValue" style="color: #e0e0e0;">3</span>
+                </div>
+
+                <div class="speed-control">
+                    <label for="fontSize" style="color: #e0e0e0;">Schriftgröße:</label>
+                    <input type="range" id="fontSize" min="12" max="40" value="24" oninput="updateFontSize()">
+                    <span id="fontValue" style="color: #e0e0e0;">24px</span>
+                </div>
+            </div>
+
+            <div class="teleprompter-content" id="teleprompterContent">
+                <p style="text-align: center; color: #666; font-size: 1.2rem; padding: 5rem;">
+                    Füge zuerst Content im Editor hinzu, dann erscheint er hier als Teleprompter.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Section -->
+    <div id="navigation" class="content">
+        <h2 style="margin-bottom: 1.5rem; color: #667eea;">📑 Paragraphen-Übersicht</h2>
+        <div class="navigation-container" id="navigationContainer">
+            <p style="color: #666;">Keine Paragraphen vorhanden. Füge Content im Editor hinzu.</p>
+        </div>
+    </div>
+
+    <script>
+        // Global State
+        let isPlaying = false;
+        let scrollSpeed = 3;
+        let scrollInterval = null;
+
+        // Load content on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadContent();
+            updateStats();
+            renderTeleprompter();
+            renderNavigation();
+        });
+
+        // Tab Switching
+        function switchTab(tabName) {
+            // Hide all content
+            document.querySelectorAll('.content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active from all tabs
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Activate selected tab
+            event.target.classList.add('active');
+
+            // Special actions for teleprompter
+            if (tabName === 'teleprompter') {
+                renderTeleprompter();
+            }
+
+            if (tabName === 'navigation') {
+                renderNavigation();
+            }
+        }
+
+        // Save Content
+        function saveContent() {
+            const content = document.getElementById('contentEditor').value;
+            localStorage.setItem('stvo-content', content);
+            showStatus('✅ Gespeichert!');
+        }
+
+        // Auto-save every 30 seconds
+        let autoSaveTimer;
+        function autoSave() {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
+                saveContent();
+            }, 30000);
+        }
+
+        // Load Content
+        function loadContent() {
+            const content = localStorage.getItem('stvo-content');
+            if (content) {
+                document.getElementById('contentEditor').value = content;
+            }
+        }
+
+        // Export Data
+        function exportData() {
+            const content = document.getElementById('contentEditor').value;
+            const data = {
+                version: '1.0',
+                timestamp: new Date().toISOString(),
+                content: content
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `stvo-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showStatus('📥 Export erfolgreich!');
+        }
+
+        // Import Data
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        document.getElementById('contentEditor').value = data.content;
+                        saveContent();
+                        updateStats();
+                        showStatus('📤 Import erfolgreich!');
+                    } catch (error) {
+                        alert('Fehler beim Importieren: ' + error.message);
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        // Clear Content
+        function clearContent() {
+            if (confirm('Wirklich alles löschen? Diese Aktion kann nicht rückgängig gemacht werden!')) {
+                document.getElementById('contentEditor').value = '';
+                saveContent();
+                updateStats();
+                renderTeleprompter();
+                renderNavigation();
+                showStatus('🗑️ Alles gelöscht');
+            }
+        }
+
+        // Update Statistics
+        function updateStats() {
+            const content = document.getElementById('contentEditor').value;
+            
+            // Count paragraphs (lines starting with # §)
+            const paragraphs = (content.match(/^# §/gm) || []).length;
+            document.getElementById('paragraphCount').textContent = paragraphs;
+
+            // Count words
+            const words = content.trim().split(/\s+/).length;
+            document.getElementById('wordCount').textContent = words;
+
+            // Estimate reading time (150 words per minute)
+            const estimatedMinutes = Math.ceil(words / 150);
+            document.getElementById('estimatedTime').textContent = estimatedMinutes;
+        }
+
+        // Render Teleprompter
+        function renderTeleprompter() {
+            const content = document.getElementById('contentEditor').value;
+            const container = document.getElementById('teleprompterContent');
+
+            if (!content.trim()) {
+                container.innerHTML = '<p style="text-align: center; color: #666; font-size: 1.2rem; padding: 5rem;">Füge zuerst Content im Editor hinzu.</p>';
+                return;
+            }
+
+            // Parse content
+            let html = content
+                // Convert paragraph markers
+                .replace(/^# (§ \d+.*?)$/gm, '<span class="paragraph-marker">$1</span>')
+                
+                // Convert cross-references
+                .replace(/(§ \d+(?:\s+Abs\.\s+\d+)?)/g, '<span class="cross-reference" onclick="jumpToParagraph(\'$1\')">$1</span>')
+                
+                // Convert line breaks
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+
+            container.innerHTML = '<p>' + html + '</p>';
+        }
+
+        // Render Navigation
+        function renderNavigation() {
+            const content = document.getElementById('contentEditor').value;
+            const container = document.getElementById('navigationContainer');
+
+            // Extract paragraphs
+            const paragraphRegex = /^# (§ \d+.*?)$\n([\s\S]*?)(?=^# §|\n---|\z)/gm;
+            const paragraphs = [];
+            let match;
+
+            while ((match = paragraphRegex.exec(content)) !== null) {
+                const title = match[1];
+                const preview = match[2].substring(0, 150).trim() + '...';
+                paragraphs.push({ title, preview });
+            }
+
+            if (paragraphs.length === 0) {
+                container.innerHTML = '<p style="color: #666;">Keine Paragraphen vorhanden.</p>';
+                return;
+            }
+
+            container.innerHTML = paragraphs.map(p => `
+                <div class="nav-card" onclick="jumpToParagraph('${p.title}')">
+                    <h3>${p.title}</h3>
+                    <p>${p.preview}</p>
+                </div>
+            `).join('');
+        }
+
+        // Jump to Paragraph
+        function jumpToParagraph(title) {
+            switchTab('teleprompter');
+            
+            setTimeout(() => {
+                const elements = document.querySelectorAll('.paragraph-marker');
+                for (let el of elements) {
+                    if (el.textContent.includes(title)) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        el.style.background = 'rgba(102, 126, 234, 0.3)';
+                        setTimeout(() => el.style.background = '', 2000);
+                        break;
+                    }
+                }
+            }, 100);
+        }
+
+        // Teleprompter Controls
+        function togglePlayPause() {
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('playPauseBtn');
+            const content = document.getElementById('teleprompterContent');
+
+            if (isPlaying) {
+                btn.textContent = '⏸️ Pause';
+                startAutoScroll();
+            } else {
+                btn.textContent = '▶️ Start';
+                stopAutoScroll();
+            }
+        }
+
+        function startAutoScroll() {
+            const content = document.getElementById('teleprompterContent');
+            scrollInterval = setInterval(() => {
+                content.scrollTop += scrollSpeed * 0.5;
+            }, 50);
+        }
+
+        function stopAutoScroll() {
+            if (scrollInterval) {
+                clearInterval(scrollInterval);
+                scrollInterval = null;
+            }
+        }
+
+        function resetScroll() {
+            stopAutoScroll();
+            isPlaying = false;
+            document.getElementById('playPauseBtn').textContent = '▶️ Start';
+            document.getElementById('teleprompterContent').scrollTop = 0;
+        }
+
+        function updateSpeed() {
+            scrollSpeed = document.getElementById('scrollSpeed').value;
+            document.getElementById('speedValue').textContent = scrollSpeed;
+        }
+
+        function updateFontSize() {
+            const size = document.getElementById('fontSize').value;
+            document.getElementById('fontValue').textContent = size + 'px';
+            document.getElementById('teleprompterContent').style.fontSize = size + 'px';
+        }
+
+        function toggleFullscreen() {
+            const container = document.getElementById('teleprompterContainer');
+            
+            if (!document.fullscreenElement) {
+                container.requestFullscreen().catch(err => {
+                    alert('Fullscreen nicht möglich: ' + err.message);
+                });
+                container.classList.add('fullscreen');
+            } else {
+                document.exitFullscreen();
+                container.classList.remove('fullscreen');
+            }
+        }
+
+        // Show Status Message
+        function showStatus(message) {
+            const existingStatus = document.querySelector('.status-message');
+            if (existingStatus) {
+                existingStatus.remove();
+            }
+
+            const status = document.createElement('div');
+            status.className = 'status-message';
+            status.textContent = message;
+            document.body.appendChild(status);
+
+            setTimeout(() => {
+                status.remove();
+            }, 3000);
+        }
+
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + S to save
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                saveContent();
+            }
+
+            // Space to play/pause in teleprompter
+            if (e.code === 'Space' && document.getElementById('teleprompter').classList.contains('active')) {
+                e.preventDefault();
+                togglePlayPause();
+            }
+        });
+
+        // Prevent data loss
+        window.addEventListener('beforeunload', (e) => {
+            const content = document.getElementById('contentEditor').value;
+            const saved = localStorage.getItem('stvo-content');
+            
+            if (content !== saved) {
+                e.preventDefault();
+                e.returnValue = 'Du hast ungespeicherte Änderungen!';
+            }
+        });
+    </script>
+</body>
+</html>

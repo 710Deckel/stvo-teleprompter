@@ -579,7 +579,7 @@
             border-bottom-color: var(--accent-yellow);
         }
 
-        .column-header.moderation {
+        .column-header.grobfassung {
             background: rgba(249, 115, 22, 0.15);
             color: #fb923c;
             border-bottom-color: var(--accent-orange);
@@ -757,6 +757,7 @@
             color: #fb923c;
         }
 
+        .teleprompter-label.grobfassung { color: #fb923c; font-weight: 700; }
         .teleprompter-label.erlaeuterung {
             color: #fbbf24;
         }
@@ -1050,9 +1051,9 @@
                     </div>
                 </div>
                 <div class="column">
-                    <div class="column-header moderation">🟠 Moderationstext</div>
+                    <div class="column-header grobfassung">🟠 Grobfassung</div>
                     <div class="column-content">
-                        <textarea id="edit-moderation" placeholder="INTRO: Willkommen...
+                        <textarea id="edit-grobfassung" placeholder="Kurzer Podcast-Überblick...
 
 Überleitung zu § 2...
 
@@ -1332,7 +1333,7 @@ Beispiel: Neulich in der Fahrschule..."></textarea>
                 document.getElementById('edit-stvo').value = para.stvo;
                 document.getElementById('edit-vwv').value = para.vwv;
                 document.getElementById('edit-erlaeuterung').value = para.erlaeuterung;
-                document.getElementById('edit-moderation').value = para.moderation;
+                document.getElementById('edit-grobfassung').value = para.grobfassung || '';
                 
                 document.getElementById('edit-modal').classList.add('active');
             },
@@ -1347,7 +1348,7 @@ Beispiel: Neulich in der Fahrschule..."></textarea>
                 para.stvo = document.getElementById('edit-stvo').value;
                 para.vwv = document.getElementById('edit-vwv').value;
                 para.erlaeuterung = document.getElementById('edit-erlaeuterung').value;
-                para.moderation = document.getElementById('edit-moderation').value;
+                para.grobfassung = document.getElementById('edit-grobfassung').value;
 
                 this.saveData();
                 this.closeModal();
@@ -1664,17 +1665,7 @@ Beispiel: Neulich in der Fahrschule..."></textarea>
                     title.textContent = para.title;
                     section.appendChild(title);
 
-                    if (para.moderation && para.moderation.trim()) {
-                        const modLabel = document.createElement('div');
-                        modLabel.className = 'teleprompter-label moderation';
-                        modLabel.textContent = '🟠 MODERATIONSTEXT';
-                        section.appendChild(modLabel);
-
-                        const modText = document.createElement('div');
-                        modText.textContent = para.moderation;
-                        section.appendChild(modText);
-                    }
-
+                    // 1. StVO Original
                     if (para.stvo && para.stvo.trim()) {
                         const stvoLabel = document.createElement('div');
                         stvoLabel.className = 'teleprompter-label';
@@ -1686,17 +1677,19 @@ Beispiel: Neulich in der Fahrschule..."></textarea>
                         section.appendChild(stvoText);
                     }
 
-                    if (para.vwv && para.vwv.trim()) {
-                        const vwvLabel = document.createElement('div');
-                        vwvLabel.className = 'teleprompter-label';
-                        vwvLabel.textContent = '🟢 VWV-STVO';
-                        section.appendChild(vwvLabel);
+                    // 2. Grobfassung (Podcast-Überblick)
+                    if (para.grobfassung && para.grobfassung.trim()) {
+                        const grobLabel = document.createElement('div');
+                        grobLabel.className = 'teleprompter-label grobfassung';
+                        grobLabel.textContent = '🟠 GROBFASSUNG';
+                        section.appendChild(grobLabel);
 
-                        const vwvText = document.createElement('div');
-                        vwvText.textContent = para.vwv;
-                        section.appendChild(vwvText);
+                        const grobText = document.createElement('div');
+                        grobText.textContent = para.grobfassung;
+                        section.appendChild(grobText);
                     }
 
+                    // 3. Erläuterung (Bouska/Leuze)
                     if (para.erlaeuterung && para.erlaeuterung.trim()) {
                         const erlLabel = document.createElement('div');
                         erlLabel.className = 'teleprompter-label erlaeuterung';
@@ -1706,6 +1699,18 @@ Beispiel: Neulich in der Fahrschule..."></textarea>
                         const erlText = document.createElement('div');
                         erlText.textContent = para.erlaeuterung;
                         section.appendChild(erlText);
+                    }
+
+                    // 4. VwV-StVO
+                    if (para.vwv && para.vwv.trim()) {
+                        const vwvLabel = document.createElement('div');
+                        vwvLabel.className = 'teleprompter-label';
+                        vwvLabel.textContent = '🟢 VWV-STVO';
+                        section.appendChild(vwvLabel);
+
+                        const vwvText = document.createElement('div');
+                        vwvText.textContent = para.vwv;
+                        section.appendChild(vwvText);
                     }
 
                     display.appendChild(section);

@@ -1396,6 +1396,7 @@ Beispiel: Neulich in der Fahrschule..."></textarea>
                     const hasStvo = para.stvo && para.stvo.trim();
                     const hasVwv = para.vwv && para.vwv.trim();
                     const hasErl = para.erlaeuterung && para.erlaeuterung.trim();
+                    const hasGrob = para.grobfassung && para.grobfassung.trim();
                     const hasMod = para.moderation && para.moderation.trim();
 
                     let previewHTML = '';
@@ -1418,20 +1419,29 @@ Beispiel: Neulich in der Fahrschule..."></textarea>
                         `;
                     }
                     
-                    if (hasVwv) {
-                        previewHTML += `
-                            <div class="preview-section">
-                                <div class="preview-label vwv">🟢 VwV-StVO</div>
-                                <div class="preview-content vwv">${this.escapeHtml(para.vwv)}</div>
-                            </div>
-                        `;
-                    }
-                    
                     if (hasErl) {
                         previewHTML += `
                             <div class="preview-section">
                                 <div class="preview-label erlaeuterung">🟡 Erläuterung</div>
                                 <div class="preview-content erlaeuterung">${this.escapeHtml(para.erlaeuterung)}</div>
+                            </div>
+                        `;
+                    }
+                    
+                    if (hasGrob) {
+                        previewHTML += `
+                            <div class="preview-section">
+                                <div class="preview-label grobfassung">🟠 Grobfassung</div>
+                                <div class="preview-content grobfassung">${this.escapeHtml(para.grobfassung)}</div>
+                            </div>
+                        `;
+                    }
+                    
+                    if (hasVwv) {
+                        previewHTML += `
+                            <div class="preview-section">
+                                <div class="preview-label vwv">🟢 VwV-StVO</div>
+                                <div class="preview-content vwv">${this.escapeHtml(para.vwv)}</div>
                             </div>
                         `;
                     }
@@ -1786,31 +1796,6 @@ Beispiel: Neulich in der Fahrschule..."></textarea>
                             yPos += 5;
                         }
 
-                        if (para.vwv && para.vwv.trim()) {
-                            if (yPos > pageHeight - 40) {
-                                doc.addPage();
-                                yPos = 20;
-                                addFooter();
-                            }
-                            
-                            doc.setFont(undefined, 'bold');
-                            doc.text('VwV-StVO:', margin, yPos);
-                            yPos += 6;
-                            
-                            doc.setFont(undefined, 'normal');
-                            const vwvLines = doc.splitTextToSize(para.vwv, maxWidth);
-                            vwvLines.forEach(line => {
-                                if (yPos > pageHeight - 20) {
-                                    doc.addPage();
-                                    yPos = 20;
-                                    addFooter();
-                                }
-                                doc.text(line, margin, yPos);
-                                yPos += lineHeight;
-                            });
-                            yPos += 5;
-                        }
-
                         if (para.erlaeuterung && para.erlaeuterung.trim()) {
                             if (yPos > pageHeight - 40) {
                                 doc.addPage();
@@ -1825,6 +1810,56 @@ Beispiel: Neulich in der Fahrschule..."></textarea>
                             doc.setFont(undefined, 'normal');
                             const erlLines = doc.splitTextToSize(para.erlaeuterung, maxWidth);
                             erlLines.forEach(line => {
+                                if (yPos > pageHeight - 20) {
+                                    doc.addPage();
+                                    yPos = 20;
+                                    addFooter();
+                                }
+                                doc.text(line, margin, yPos);
+                                yPos += lineHeight;
+                            });
+                            yPos += 5;
+                        }
+
+                        if (para.grobfassung && para.grobfassung.trim()) {
+                            if (yPos > pageHeight - 40) {
+                                doc.addPage();
+                                yPos = 20;
+                                addFooter();
+                            }
+                            
+                            doc.setFont(undefined, 'bold');
+                            doc.text('Grobfassung:', margin, yPos);
+                            yPos += 6;
+                            
+                            doc.setFont(undefined, 'normal');
+                            const grobLines = doc.splitTextToSize(para.grobfassung, maxWidth);
+                            grobLines.forEach(line => {
+                                if (yPos > pageHeight - 20) {
+                                    doc.addPage();
+                                    yPos = 20;
+                                    addFooter();
+                                }
+                                doc.text(line, margin, yPos);
+                                yPos += lineHeight;
+                            });
+                            yPos += 5;
+                        }
+
+                        if (para.vwv && para.vwv.trim()) {
+                            if (yPos > pageHeight - 40) {
+                                doc.addPage();
+                                yPos = 20;
+                                addFooter();
+                            }
+                            
+                            doc.setFont(undefined, 'bold');
+                            doc.text('VwV-StVO:', margin, yPos);
+                            yPos += 6;
+                            
+                            doc.setFont(undefined, 'normal');
+                            const vwvLines = doc.splitTextToSize(para.vwv, maxWidth);
+                            vwvLines.forEach(line => {
                                 if (yPos > pageHeight - 20) {
                                     doc.addPage();
                                     yPos = 20;

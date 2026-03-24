@@ -1677,19 +1677,7 @@ Beispiel: Neulich in der Fahrschule..."></textarea>
                         section.appendChild(stvoText);
                     }
 
-                    // 2. Grobfassung (Podcast-Überblick)
-                    if (para.grobfassung && para.grobfassung.trim()) {
-                        const grobLabel = document.createElement('div');
-                        grobLabel.className = 'teleprompter-label grobfassung';
-                        grobLabel.textContent = '🟠 GROBFASSUNG';
-                        section.appendChild(grobLabel);
-
-                        const grobText = document.createElement('div');
-                        grobText.textContent = para.grobfassung;
-                        section.appendChild(grobText);
-                    }
-
-                    // 3. Erläuterung (Bouska/Leuze)
+                    // 2. Erläuterung (Bouska/Leuze)
                     if (para.erlaeuterung && para.erlaeuterung.trim()) {
                         const erlLabel = document.createElement('div');
                         erlLabel.className = 'teleprompter-label erlaeuterung';
@@ -1699,6 +1687,18 @@ Beispiel: Neulich in der Fahrschule..."></textarea>
                         const erlText = document.createElement('div');
                         erlText.textContent = para.erlaeuterung;
                         section.appendChild(erlText);
+                    }
+
+                    // 3. Grobfassung (Podcast-Überblick)
+                    if (para.grobfassung && para.grobfassung.trim()) {
+                        const grobLabel = document.createElement('div');
+                        grobLabel.className = 'teleprompter-label grobfassung';
+                        grobLabel.textContent = '🟠 GROBFASSUNG';
+                        section.appendChild(grobLabel);
+
+                        const grobText = document.createElement('div');
+                        grobText.textContent = para.grobfassung;
+                        section.appendChild(grobText);
                     }
 
                     // 4. VwV-StVO
